@@ -1,0 +1,18 @@
+FIX
+* Fix grep keymap and implem (<f4)
+* CPU burn & launch time
+  => too many buffers are loaded
+  => limit number files
+* git-gutter
+* enhance flyspell
+  => fonctionnement normal (ce n'est pas flycheck)
+* custom-post.el: fix assignement to free variable
+* custom-post.el: use 'use-package emacs' for all code
+
+USE
+* multi-cursor
+* org-roam
+
+MEMO
+* markdown
+ * linter => install multimarkdown 6
