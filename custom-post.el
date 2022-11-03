@@ -1,42 +1,117 @@
-;;
 ;; usefull custo taken from: https://github.com/ianyepan/yay-evil-emacs
-;;
 
-(use-package lsp-mode
-  :init (setq lsp-keymap-prefix "C-c l"
-              lsp-keep-workspace-alive nil
-              lsp-signature-auto-activate nil
-              lsp-modeline-code-actions-enable nil
-              lsp-modeline-diagnostics-enable nil
-              lsp-modeline-workspace-status-enable nil
-              lsp-headerline-breadcrumb-enable t
+;; https://git.sr.ht/~sirn/dotfiles/tree/be8905bf233e10acd5083c82ca538eaf6045279d/item/etc/emacs/packages/tool-ansible.el
+(use-package ansible
+  :after yaml-mode
+  :commands ansible
+  :preface
+  (setq bl/ansible-filename-re
+        ".*\\(main\.yml\\|site\.yml\\|encrypted\.yml\\|roles/.+\.yml\\|group_vars/.+\\|host_vars/.+\\)")
+  (defun bl/ansible-maybe-enable ()
+    (and (stringp buffer-file-name)
+         (string-match bl/ansible-filename-re buffer-file-name)))
+  (defun bl/setup-ansible-maybe ()
+    (when (bl/ansible-maybe-enable)
+      (ansible t)))
+  :init
+  (add-hook 'yaml-mode-hook 'bl/setup-ansible-maybe))
 
-              lsp-semantic-tokens-enable t
-              lsp-progress-spinner-type 'progress-bar-filled
+(use-package ansible-doc
+  :after ansible
+  :diminish ansible-doc-mode
+  :bind (:map ansible-doc-mode-map
+         ("<f1>" . ansible-doc))
+  :commands
+  (ansible-doc
+   ansible-doc-mode)
+  :preface
+  (defun bl/setup-ansible-doc ()
+    (ansible-doc-mode t))
+  :init
+  (add-hook 'ansible-hook 'bl/setup-ansible-doc))
 
-              lsp-enable-file-watchers nil
-              lsp-enable-folding nil
-              lsp-enable-symbol-highlighting nil
-              lsp-enable-text-document-color nil
+;; Automatically refreshes the buffer for changes outside of Emacs
+;; Auto refreshes every 2 seconds. Don’t forget to refresh the version control status as well.
+;; Note(bl): override autorevert from centaur
+(use-package autorevert
+  :ensure nil
+  :config
+  (global-auto-revert-mode +1)
+  (setq auto-revert-interval 2
+        auto-revert-check-vc-info t
+        global-auto-revert-non-file-buffers t
+        auto-revert-verbose nil))
 
-              lsp-enable-indentation nil
-              lsp-enable-on-type-formatting nil
+(use-package centaur-tabs
+  :ensure t
+  :demand
+  :config
+  (setq centaur-tabs-set-bar 'under
+        ;; Note: If you're not using Spacmeacs, in order for the underline to display
+        ;; correctly you must add the following line:
+        x-underline-at-descent-line t
+        centaur-tabs-height 32)
+  (centaur-tabs-mode t)
+  ;; group your tabs by Projectile’s project
+  (centaur-tabs-group-by-projectile-project)
+  :bind
+  ("C-<prior>" . centaur-tabs-backward)
+  ("C-<next>" . centaur-tabs-forward))
 
-              ;; For diagnostics
-              lsp-diagnostics-disabled-modes '(markdown-mode gfm-mode)
+;; Dumb Jump uses The Silver Searcher ag, ripgrep rg, or grep to find potential definitions of a function or variable under point.
+;; It uses a set of regular expressions based on the file extension, or major-mode, of the current buffer.
+;; The matches are run through a shared set of heuristic methods to find the best candidate to jump to.
+;; If it can't decide it will present the user with a list in a pop-menu, helm, or ivy (see dumb-jump-selector).
+(use-package dumb-jump)
 
-              ;; For clients
-              lsp-clients-python-library-directories '("/usr/local/" "/usr/")
+;; Remap <f5> key set by LSP dab-mode
+;; note(bl) conflict keymap with LSP dap-mode
+(use-package emacs
+  :ensure nil
+  :config
+  (dolist (key '("<f5>" "M-<f5>"))
+    (unbind-key key lsp-mode-map)))
 
-              lsp-ansible-ansible-path "/usr/local/bin/ansible"
-              lsp-ansible-python-interpreter-path "/usr/bin/python3"
-              lsp-ansible-validation-lint-path "/usr/local/bin/ansible-lint"
+;; Given ~/Projects/FOSS/emacs/lisp/comint.el
+;; auto => emacs/l/comint.el (in a project) or comint.el
+;; truncate-upto-project => ~/P/F/emacs/lisp/comint.el
+;; truncate-from-project => ~/Projects/FOSS/emacs/l/comint.el
+;; truncate-with-project => emacs/l/comint.el
+;; truncate-except-project => ~/P/F/emacs/l/comint.el
+;; truncate-upto-root => ~/P/F/e/lisp/comint.el
+;; truncate-all => ~/P/F/e/l/comint.el
+;; truncate-nil => ~/Projects/FOSS/emacs/lisp/comint.el
+;; relative-from-project => emacs/lisp/comint.el
+;; relative-to-project => lisp/comint.el
+;; file-name => comint.el
+;; buffer-name => comint.el<2> (uniquify buffer name)
+(use-package emacs
+  :ensure nil
+  :config
+  (setq doom-modeline-buffer-file-name-style 'relative-from-project
+        doom-modeline-project-Easier 'detection))
 
-              lsp-auto-guess-root t
-              lsp-go-gopls-server-path "/home/T0125936/go/bin/gopls"))
+;; Drag stuff (lines, words, region, etc...) around
+;; note(bl) change drag-stuff-modifier to avoid conflict with windmove shortcuts
+(use-package drag-stuff
+  :diminish
+  :commands drag-stuff-define-keys
+  :hook (after-init . drag-stuff-global-mode)
+  :config
+  (setq drag-stuff-modifier 'hyper)
+  (add-to-list 'drag-stuff-except-modes 'org-mode)
+  (drag-stuff-define-keys))
+
+(use-package windmove
+  :ensure t
+  :config
+  ;; use command key on Mac
+  (setq windmove-default-keybindings 'meta)
+  ;; wrap around at edges
+  (setq windmove-wrap-around t))
 
 ;; Zoom in/out
-;;;;;;;;;;;;;;;;
+;; note(bl) zoom in/out with M-+/M--
 (use-package emacs
   :ensure nil
   :after (face-remap)
@@ -68,7 +143,7 @@
                      (global-text-scale-adjust -1))))
 
 ;; Modify default window split
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; note(bl) give focus to new window
 (use-package emacs
   :ensure nil
   :preface
@@ -86,6 +161,34 @@
   (("C-x 2" . 'ian/split-and-follow-horizontally)
    ("C-x 3" . 'ian/split-and-follow-vertically)))
 
+;; (global-set-key (kbd "<C-S-f1>") 'my/filename)
+(use-package emacs
+  :ensure nil
+  :after (projectile)
+  :config
+  (defvar jira-url "https://thales-factory.atlassian.net/" "Jira URL")
+  (defun open-jira-ID-at-point ()
+    (interactive)
+    (when (projectile-project-p)
+      (let ((project-name (projectile-project-name))
+            (identifiant (buffer-substring (line-beginning-position) (line-end-position)))
+            (case-fold-search t))
+        (when (string-equal project-name "kast")
+          (cond
+           ((string-match "kas-\\([[:alnum:]]+\\)[[:space:]]*" identifiant)
+            (browse-url (concat jira-url "browse/KAS-" (match-string 1 identifiant))))
+           (t
+            (message "Jira ID (KAS-XXXX) not found")))))))
+  :bind
+  (("<f12>" . 'open-jira-ID-at-point)))
+
+;; Increase selected region by semantic units
+;; note(bl) add contract-region keymap
+(use-package expand-region
+  :bind
+  ("C-=" . er/expand-region)
+  ("C--" . er/contract-region))
+
 ;; File-related tweaks
 ;; Don’t bother confirming killing processes and don’t let backup~ files scatter around.
 (use-package files
@@ -94,22 +197,102 @@
   (setq confirm-kill-processes nil
         create-lockfiles nil))
 
-;; Automatically refreshes the buffer for changes outside of Emacs
-;; Auto refreshes every 2 seconds. Don’t forget to refresh the version control status as well.
-;; Note(bl): override autorevert from centaur
-(use-package autorevert
-  :ensure nil
-  :config
-  (global-auto-revert-mode +1)
-  (setq auto-revert-interval 2
-        auto-revert-check-vc-info t
-        global-auto-revert-non-file-buffers t
-        auto-revert-verbose nil))
+(use-package flycheck
+  :custom
+  (flycheck-disabled-checkers '(python-flake8)))
 
-;; Clean up whitespace on save
-(use-package whitespace
+(use-package flycheck-yamllint
+  :ensure t
+  :defer t
+  :init
+  (progn
+    (eval-after-load 'flycheck
+      '(add-hook 'flycheck-mode-hook 'flycheck-yamllint-setup))))
+
+;; fzf is a fuzzy file finder which is very quick.
+(use-package fzf)
+
+;; Search tool
+;; note(bl) to fix find-grep command
+(use-package grep
   :ensure nil
-  :hook (before-save . whitespace-cleanup))
+  :commands grep-apply-setting
+  :init
+  ;; note(bl) to fix grep command
+  (setq grep-use-null-device nil)
+  :config
+  (cond
+   ((executable-find "ugrep")
+    (grep-apply-setting
+     'grep-command "ugrep --color=auto -0In -e ")
+    (grep-apply-setting
+     'grep-template "ugrep --color=auto -0In -e <R> <D>")
+    (grep-apply-setting
+     'grep-find-command '("ugrep --color=auto -0Inr -e ''" . 30))
+    (grep-apply-setting
+     'grep-find-template "ugrep <C> -0Inr -e <R> <D>"))
+   ((executable-find "rg")
+    (grep-apply-setting
+     'grep-command "rg --color=auto --null -nH --no-heading -e ")
+    (grep-apply-setting
+     'grep-template "rg --color=auto --null --no-heading -g '!*/' -e <R> <D>")
+    (grep-apply-setting
+     ;; note(bl) to fix find-grep command
+     'grep-find-command '("rg --color=auto --null -nH --no-heading -e ''" . 45))
+    (grep-apply-setting
+     'grep-find-template "rg --color=auto --null -nH --no-heading -e <R> <D>"))))
+
+(use-package lsp-mode
+  :init (setq lsp-keymap-prefix "C-c l"
+              lsp-keep-workspace-alive nil
+              lsp-signature-auto-activate nil
+              lsp-modeline-code-actions-enable nil
+              lsp-modeline-diagnostics-enable nil
+              lsp-modeline-workspace-status-enable nil
+              lsp-headerline-breadcrumb-enable t
+              lsp-headerline-breadcrumb-segments '(project file symbols)
+              lsp-semantic-tokens-enable t
+              lsp-progress-spinner-type 'progress-bar-filled
+
+              lsp-enable-file-watchers nil
+              lsp-enable-folding nil
+              lsp-enable-symbol-highlighting nil
+              lsp-enable-text-document-color nil
+
+              lsp-enable-indentation nil
+              lsp-enable-on-type-formatting nil
+
+              ;; For diagnostics
+              lsp-diagnostics-disabled-modes '(markdown-mode gfm-mode)
+
+              ;; For clients
+              lsp-clients-python-library-directories '("/usr/local/" "/usr/")
+
+              lsp-ansible-ansible-path "/usr/local/bin/ansible"
+              lsp-ansible-python-interpreter-path "/usr/bin/python3"
+              lsp-ansible-validation-lint-path "/usr/local/bin/ansible-lint"
+
+              lsp-auto-guess-root t
+              lsp-go-gopls-server-path "$HOME/go/bin/gopls"))
+
+(use-package markdown-mode
+  :bind (:map markdown-mode-map
+         ("<f2>" . markdown-outline-previous)
+         ("<f3>" . markdown-outline-next)))
+
+(use-package minimap
+  :diminish minimap-mode
+  :init
+  (setq minimap-window-location 'right
+        minimap-width-fraction 0.15
+        minimap-hide-scroll-bar nil
+        minimap-hide-fringes t
+        minimap-dedicated-window t
+        minimap-minimum-width 20)
+  :custom-face
+  (minimap-font-face ((t (:height 13 :weight bold :width condensed
+                          :spacing dual-width :family "VT323"))))
+  (minimap-active-region-background ((t (:extend t :background "gray24")))))
 
 ;; Mouse wheel (track-pad) scroll speed
 ;; By default, the scrolling is way too fast to be precise and helpful.
@@ -118,46 +301,19 @@
   :config (setq mouse-wheel-scroll-amount '(2 ((shift) . 1))
                 mouse-wheel-progressive-speed nil))
 
-;;
-;; https://git.sr.ht/~sirn/dotfiles/tree/be8905bf233e10acd5083c82ca538eaf6045279d/item/etc/emacs/packages/tool-ansible.el
-(use-package ansible
-  :after yaml-mode
-  :commands ansible
-  :preface
-  (setq bl/ansible-filename-re
-        ".*\\(main\.yml\\|site\.yml\\|encrypted\.yml\\|roles/.+\.yml\\|group_vars/.+\\|host_vars/.+\\)")
-  (defun bl/ansible-maybe-enable ()
-    (and (stringp buffer-file-name)
-         (string-match bl/ansible-filename-re buffer-file-name)))
-  (defun bl/setup-ansible-maybe ()
-    (when (bl/ansible-maybe-enable)
-      (ansible t)))
+;; Search tools
+;; Writable `grep' buffer
+;; note(bl) change enable key to 'w'
+(use-package wgrep
   :init
-  (add-hook 'yaml-mode-hook 'bl/setup-ansible-maybe))
+  (setq wgrep-auto-save-buffer t
+        wgrep-change-readonly-file t
+        wgrep-enable-key "w"))
 
-(use-package ansible-doc
-  :after ansible
-  :diminish ansible-doc-mode
-  :bind (:map ansible-doc-mode-map
-         ("<f1>" . ansible-doc))
-  :commands
-  (ansible-doc
-   ansible-doc-mode)
-  :preface
-  (defun bl/setup-ansible-doc ()
-    (ansible-doc-mode t))
-  :init
-  (add-hook 'ansible-hook 'bl/setup-ansible-doc))
-
-(use-package recentf
+;; Clean up whitespace on save
+(use-package whitespace
   :ensure nil
-  :custom
-  (recentf-max-saved-items 50))
-
-(use-package markdown-mode
-  :bind (:map markdown-mode-map
-         ("<f2>" . markdown-outline-previous)
-         ("<f3>" . markdown-outline-next)))
+  :hook (before-save . whitespace-cleanup))
 
 ;; Display line changes in gutter based on git history. Enable it everywhere.
 ;; Gutter Icons indicating inserted, modified or deleted lines
@@ -200,31 +356,16 @@
 ;;   (define-fringe-bitmap 'git-gutter-fr:modified [224] nil nil '(center repeated))
 ;;   (define-fringe-bitmap 'git-gutter-fr:deleted [128 192 224 240] nil nil 'bottom))
 
-;; fzf is a fuzzy file finder which is very quick.
-(use-package fzf)
-
 ;; ;; deadgrep uses rg to search for strings, project.el means it will automatically use the project root
 ;; ;; if (e.g.) it's a git repository, which is my usual use case.
 ;; (use-package deadgrep)
 
-;; Dumb Jump uses The Silver Searcher ag, ripgrep rg, or grep to find potential definitions of a function or variable under point.
-;; It uses a set of regular expressions based on the file extension, or major-mode, of the current buffer.
-;; The matches are run through a shared set of heuristic methods to find the best candidate to jump to.
-;; If it can't decide it will present the user with a list in a pop-menu, helm, or ivy (see dumb-jump-selector).
-(use-package dumb-jump)
 ;; :bind (("C-M-g" . dumb-jump-go)
 ;;        ("C-M-p" . dumb-jump-back)
 ;;        ("C-M-q" . dumb-jump-quick-look)))
 (add-hook 'xref-backend-functions #'dumb-jump-xref-activate t)
 
-(use-package flycheck
-  :custom
-  (flycheck-disabled-checkers '(python-flake8)))
-
 ;; (use-package git-commit-insert-issue)
-
-;; Easier Window Switching using meta key
-(windmove-default-keybindings 'meta)
 
 ;;;;::::::::::
 ;; SHORTKEYS
@@ -244,17 +385,24 @@
 
 (global-set-key (kbd "<f4>") 'counsel-grep)
 (global-set-key (kbd "<C-f4>") 'projectile-ripgrep)
-(global-set-key (kbd "<C-S-f4>") 'rgrep)
+(global-set-key (kbd "<C-S-f4>") 'counsel-projectile-git-grep)
 
 (global-set-key (kbd "<f5>") 'magit-blame)
 (global-set-key (kbd "<f8>") 'magit-status)
-(global-set-key (kbd "<C-f8>") 'magit-checkout)
-(global-set-key (kbd "<C-S-f8>") 'magit-log-buffer-file)
+(global-set-key (kbd "<f8> c") 'magit-checkout)
+(global-set-key (kbd "<f8> l") 'magit-log-buffer-file)
 
 (global-set-key (kbd "<f9>") 'flyspell-auto-correct-word)
 (global-set-key (kbd "<C-f9>") 'flyspell-correct-word-before-point)
 
-(setq eglot-extend-to-xref t)
+(global-set-key (kbd "<C-f11>") 'minimap-mode)
+(global-set-key (kbd "<C-S-f11>") 'centaur-tabs-mode)
+
+;; ;; Copy the path to your kill ring instead of placing it into your buffer
+;; (defun my/filename ()
+;;   "Copy the full path of the current buffer."
+;;   (interactive)
+;;   (kill-new (buffer-file-name (window-buffer (minibuffer-selected-window)))))
 
 ;; (use-package jinja2-mode :defer t)
 
@@ -265,46 +413,3 @@
 ;;         plantuml-default-exec-mode 'jar)
 ;;   (add-to-list 'auto-mode-alist '("\\.plantuml\\'" . plantuml-mode)))
 (setq org-plantuml-jar-path "~/work/plantuml-1.2022.1.jar")
-
-;; Given ~/Projects/FOSS/emacs/lisp/comint.el
-;; auto => emacs/l/comint.el (in a project) or comint.el
-;; truncate-upto-project => ~/P/F/emacs/lisp/comint.el
-;; truncate-from-project => ~/Projects/FOSS/emacs/l/comint.el
-;; truncate-with-project => emacs/l/comint.el
-;; truncate-except-project => ~/P/F/emacs/l/comint.el
-;; truncate-upto-root => ~/P/F/e/lisp/comint.el
-;; truncate-all => ~/P/F/e/l/comint.el
-;; truncate-nil => ~/Projects/FOSS/emacs/lisp/comint.el
-;; relative-from-project => emacs/lisp/comint.el
-;; relative-to-project => lisp/comint.el
-;; file-name => comint.el
-;; buffer-name => comint.el<2> (uniquify buffer name)
-(setq doom-modeline-buffer-file-name-style 'relative-from-project)
-(setq doom-modeline-project-detection 'projectile)
-
-;; ;; Copy the path to your kill ring instead of placing it into your buffer
-;; (defun my/filename ()
-;;   "Copy the full path of the current buffer."
-;;   (interactive)
-;;   (kill-new (buffer-file-name (window-buffer (minibuffer-selected-window)))))
-
-;; (global-set-key (kbd "<C-S-f1>") 'my/filename)
-(use-package emacs
-  :ensure nil
-  :after (projectile)
-  :config
-  (defvar jira-url "https://thales-factory.atlassian.net/" "Jira URL")
-  (defun open-jira-ID-at-point ()
-    (interactive)
-    (when (projectile-project-p)
-      (let ((project-name (projectile-project-name))
-            (identifiant (buffer-substring (line-beginning-position) (line-end-position)))
-            (case-fold-search t))
-        (when (string-equal project-name "kast")
-          (cond
-           ((string-match "kas-\\([[:alnum:]]+\\)[[:space:]]*" identifiant)
-            (browse-url (concat jira-url "browse/KAS-" (match-string 1 identifiant))))
-           (t
-            (message "Jira ID (KAS-XXXX) not found")))))))
-  :bind
-  (("<f12>" . 'open-jira-ID-at-point)))
