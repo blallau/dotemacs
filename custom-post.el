@@ -47,16 +47,21 @@
   :demand
   :config
   (setq centaur-tabs-set-bar 'under
+        ;; Navigate through tab groups only
+        centaur-tabs-cycle-scope 'tabs
+        centaur-tabs-show-navigation-buttons nil
         ;; Note: If you're not using Spacmeacs, in order for the underline to display
         ;; correctly you must add the following line:
         x-underline-at-descent-line t
+        centaur-tabs-adjust-buffer-order t
         centaur-tabs-height 32)
   (centaur-tabs-mode t)
+  (centaur-tabs-enable-buffer-alphabetical-reordering)
   ;; group your tabs by Projectile’s project
   (centaur-tabs-group-by-projectile-project)
   :bind
-  ("C-<prior>" . centaur-tabs-backward)
-  ("C-<next>" . centaur-tabs-forward))
+  ("C-s-<left>" . centaur-tabs-backward)
+  ("C-s-<right>" . centaur-tabs-forward))
 
 ;; Dumb Jump uses The Silver Searcher ag, ripgrep rg, or grep to find potential definitions of a function or variable under point.
 ;; It uses a set of regular expressions based on the file extension, or major-mode, of the current buffer.
@@ -196,6 +201,10 @@
   :config
   (setq confirm-kill-processes nil
         create-lockfiles nil))
+
+;; note(bl) add flycheck-inline to display error in buffer
+(use-package flycheck-inline
+  :init (add-hook 'flycheck-mode-hook #'flycheck-inline-mode))
 
 (use-package flycheck
   :custom

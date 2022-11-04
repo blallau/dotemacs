@@ -159,4 +159,5 @@
  ;; If there is more than one, they won't work right.
  '(centaur-package-archives 'melpa)
  '(centaur-theme 'system)
- '(flycheck-markdown-mdl-rules '("~MD013" "~MD029" "~MD033" "~MD044" "~MD046")))
+ '(flycheck-markdown-mdl-rules '("~MD013" "~MD029" "~MD033" "~MD044" "~MD046"))
+ '(lsp-headerline-breadcrumb-segments '(project file symbols)))

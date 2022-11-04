@@ -1,0 +1,30 @@
+* FIX
+** centaur-tab not launch at startup
+** CPU burn & launch time
+  => too many buffers are loaded
+  => limit number files
+*** git-gutter
+***** use use-package in whole custom-post.el
+*** fix (windmove-default-keybindings 'Zoom)
+** DONE
+**** enhance flyspell
+=> fonctionnement normal (ne fonctionne pas comme flycheck)
+**** Fix grep keymap and implem (<f4>)
+**** git blame keymap
+**** fix git-blame <f5>
+
+* Learn
+** multi-cursor
+** org-roam
+*** expand-region
+*** Hydra, <f6>, personal keymap, personal menu
+
+* INSTALL
+-  emacs 28
+-  fdfind (projectile-generic-command)
+  => https://github.com/sharkdp/fd
+-  markdown linter
+  => install multimarkdown 6
+
+* DONE
+** init-projectile.el
