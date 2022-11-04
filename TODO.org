@@ -1,30 +1,39 @@
 * FIX
-** centaur-tab not launch at startup
 ** CPU burn & launch time
-  => too many buffers are loaded
-  => limit number files
-*** git-gutter
-***** use use-package in whole custom-post.el
-*** fix (windmove-default-keybindings 'Zoom)
-** DONE
-**** enhance flyspell
+=> too many buffers are loaded
+=> limit number files
+** git-gutter VS diff-hl
+** use use-package in whole custom-post.el
+** ansible LSP error (**lsp-logs**)
+#+begin_src
+Command failed: /usr/bin/python3 /usr/local/bin/ansible-config dump
+Traceback (most recent call last):
+  File "/usr/local/bin/ansible-config", line 5, in <module>
+    from ansible.cli.config import main
+ImportError: cannot import name 'main' from 'ansible.cli.config' (/home/T0125936/.local/lib/python3.8/site-packages/ansible/cli/config.py)
+#+end_src
+
+* done
+** enhance flyspell
 => fonctionnement normal (ne fonctionne pas comme flycheck)
-**** Fix grep keymap and implem (<f4>)
-**** git blame keymap
-**** fix git-blame <f5>
+** fix grep keymap and implem (<f4>)
+** git blame keymap <f5>
+** centaur-tab not launch at startup
+** fix (windmove-default-keybindings 'Zoom)
 
 * Learn
 ** multi-cursor
 ** org-roam
-*** expand-region
-*** Hydra, <f6>, personal keymap, personal menu
+** expand-region
+** Hydra, <f6>, personal keymap, personal menu
 
-* INSTALL
+* Install
 -  emacs 28
 -  fdfind (projectile-generic-command)
   => https://github.com/sharkdp/fd
 -  markdown linter
   => install multimarkdown 6
 
-* DONE
+* done
+** init-dict.el
 ** init-projectile.el
