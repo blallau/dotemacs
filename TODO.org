@@ -4,6 +4,14 @@
 => limit number files
 ** git-gutter VS diff-hl
 ** use use-package in whole custom-post.el
+
+* done
+** enhance flyspell
+=> fonctionnement normal (ne fonctionne pas comme flycheck)
+** fix grep keymap and implem (<f4>)
+** git blame keymap <f5>
+** centaur-tab not launch at startup
+** fix (windmove-default-keybindings 'Zoom)
 ** ansible LSP error (**lsp-logs**)
 #+begin_src
 Command failed: /usr/bin/python3 /usr/local/bin/ansible-config dump
@@ -13,19 +21,15 @@ Traceback (most recent call last):
 ImportError: cannot import name 'main' from 'ansible.cli.config' (/home/T0125936/.local/lib/python3.8/site-packages/ansible/cli/config.py)
 #+end_src
 
-* done
-** enhance flyspell
-=> fonctionnement normal (ne fonctionne pas comme flycheck)
-** fix grep keymap and implem (<f4>)
-** git blame keymap <f5>
-** centaur-tab not launch at startup
-** fix (windmove-default-keybindings 'Zoom)
-
 * Learn
 ** multi-cursor
 ** org-roam
 ** expand-region
 ** Hydra, <f6>, personal keymap, personal menu
+https://github.com/abo-abo/hydra
+https://github.com/jerrypnz/major-mode-hydra.el
+https://readingworldmagazine.com/emacs/2020-02-27-emacs-hydra-set-up-code/
+https://oremacs.com/2015/02/02/colorful-hydrae/
 
 * Install
 -  emacs 28
@@ -36,4 +40,5 @@ ImportError: cannot import name 'main' from 'ansible.cli.config' (/home/T0125936
 
 * done
 ** init-dict.el
+** init-hydra.el
 ** init-projectile.el

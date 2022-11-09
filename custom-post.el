@@ -64,6 +64,13 @@
   ("C-s-<left>" . centaur-tabs-backward)
   ("C-s-<right>" . centaur-tabs-forward))
 
+;; note(bl) add centaur-tab and minimap
+(pretty-hydra-define+ toggles-hydra ()
+  (;; these heads are added to the existing "Windows" column
+   "Basic"
+   (("u" centaur-tabs-mode "centaur mode" :toggle t)
+    ("x" minimap-mode "minimap mode" :toggle t))))
+
 ;; Dumb Jump uses The Silver Searcher ag, ripgrep rg, or grep to find potential definitions of a function or variable under point.
 ;; It uses a set of regular expressions based on the file extension, or major-mode, of the current buffer.
 ;; The matches are run through a shared set of heuristic methods to find the best candidate to jump to.
