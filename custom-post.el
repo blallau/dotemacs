@@ -60,6 +60,7 @@
   ;; group your tabs by Projectile’s project
   (centaur-tabs-group-by-projectile-project)
   :bind
+  ("<C-S-f11>" . centaur-tabs-mode)
   ("C-s-<left>" . centaur-tabs-backward)
   ("C-s-<right>" . centaur-tabs-forward))
 
@@ -291,12 +292,15 @@
 
 (use-package minimap
   :diminish minimap-mode
+  :bind
+  ("C-<f11>" . minimap-mode)
   :init
   (setq minimap-window-location 'right
         minimap-width-fraction 0.15
         minimap-hide-scroll-bar nil
         minimap-hide-fringes t
         minimap-dedicated-window t
+        minimap-always-recenter t
         minimap-minimum-width 20)
   :custom-face
   (minimap-font-face ((t (:height 13 :weight bold :width condensed
@@ -403,9 +407,6 @@
 
 (global-set-key (kbd "<f9>") 'flyspell-auto-correct-word)
 (global-set-key (kbd "<C-f9>") 'flyspell-correct-word-before-point)
-
-(global-set-key (kbd "<C-f11>") 'minimap-mode)
-(global-set-key (kbd "<C-S-f11>") 'centaur-tabs-mode)
 
 ;; ;; Copy the path to your kill ring instead of placing it into your buffer
 ;; (defun my/filename ()
