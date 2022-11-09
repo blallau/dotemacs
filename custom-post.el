@@ -283,7 +283,7 @@
               lsp-ansible-validation-lint-path "/usr/local/bin/ansible-lint"
 
               lsp-auto-guess-root t
-              lsp-go-gopls-server-path "$HOME/go/bin/gopls"))
+              lsp-go-gopls-server-path "/home/T0125936/go/bin/gopls"))
 
 (use-package markdown-mode
   :bind (:map markdown-mode-map
