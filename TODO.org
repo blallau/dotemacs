@@ -6,6 +6,8 @@
 ** use use-package in whole custom-post.el
 
 * done
+** intégration language-tools
+https://github.com/mhayashi1120/Emacs-langtool
 ** enhance flyspell
 => fonctionnement normal (ne fonctionne pas comme flycheck)
 ** fix grep keymap and implem (<f4>)
@@ -22,6 +24,8 @@ ImportError: cannot import name 'main' from 'ansible.cli.config' (/home/T0125936
 #+end_src
 
 * Learn
+** proselint
+https://github.com/emacs-straight/flymake-proselint
 ** multi-cursor
 ** org-roam
 ** expand-region
@@ -37,8 +41,16 @@ https://oremacs.com/2015/02/02/colorful-hydrae/
   => https://github.com/sharkdp/fd
 -  markdown linter
   => install multimarkdown 6
+-
 
 * done
+** init-const.el
+** init-custom.el
+** [init-dart.el]
+** [init-dashboard.el]
 ** init-dict.el
+** init-docker.el
+** init-dired.el
+** init-elixir.el
 ** init-hydra.el
 ** init-projectile.el

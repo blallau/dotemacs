@@ -30,17 +30,24 @@
   :init
   (add-hook 'ansible-hook 'bl/setup-ansible-doc))
 
-;; Automatically refreshes the buffer for changes outside of Emacs
-;; Auto refreshes every 2 seconds. Don’t forget to refresh the version control status as well.
-;; Note(bl): override autorevert from centaur
-(use-package autorevert
-  :ensure nil
-  :config
-  (global-auto-revert-mode +1)
-  (setq auto-revert-interval 2
-        auto-revert-check-vc-info t
-        global-auto-revert-non-file-buffers t
-        auto-revert-verbose nil))
+;; (use-package blamer
+;;   :ensure t
+;;   ;;  :quelpa ((blamer :fetcher github :repo "artawower/blamer.el") :upgrade t)
+;;   :bind (("s-i" . blamer-show-commit-info)
+;;          ("C-c i" . blamer-show-posframe-commit-info))
+;;   :defer 20
+;;   :custom
+;;   (blamer-idle-time 0.3)
+;;   (blamer-min-offset 70)
+;;   (blamer-max-commit-message-length 80) ;; Show me a lot of the commit title
+;;   (blamer--overlay-popup-position 'smart)
+;;   :custom-face
+;;   (blamer-face ((t :foreground "#7a88cf"
+;;                    :background nil
+;;                    :height 100
+;;                    :italic t)))
+;;   :config
+;;   (global-blamer-mode 1))
 
 (use-package centaur-tabs
   :ensure t
@@ -59,17 +66,28 @@
   (centaur-tabs-enable-buffer-alphabetical-reordering)
   ;; group your tabs by Projectile’s project
   (centaur-tabs-group-by-projectile-project)
+  :hook
+  (dired-mode . centaur-tabs-local-mode)
+  (dashboard-mode . centaur-tabs-local-mode)
+  (term-mode . centaur-tabs-local-mode)
+  (calendar-mode . centaur-tabs-local-mode)
+  (org-agenda-mode . centaur-tabs-local-mode)
+  (helpful-mode . centaur-tabs-local-mode)
   :bind
   ("<C-S-f11>" . centaur-tabs-mode)
   ("C-s-<left>" . centaur-tabs-backward)
   ("C-s-<right>" . centaur-tabs-forward))
 
-;; note(bl) add centaur-tab and minimap
-(pretty-hydra-define+ toggles-hydra ()
-  (;; these heads are added to the existing "Windows" column
-   "Basic"
-   (("u" centaur-tabs-mode "centaur mode" :toggle t)
-    ("x" minimap-mode "minimap mode" :toggle t))))
+;; Drag stuff (lines, words, region, etc...) around
+;; note(bl) change drag-stuff-modifier to avoid conflict with windmove shortcuts
+(use-package drag-stuff
+  :diminish
+  :commands drag-stuff-define-keys
+  :hook (after-init . drag-stuff-global-mode)
+  :config
+  (setq drag-stuff-modifier 'hyper)
+  (add-to-list 'drag-stuff-except-modes 'org-mode)
+  (drag-stuff-define-keys))
 
 ;; Dumb Jump uses The Silver Searcher ag, ripgrep rg, or grep to find potential definitions of a function or variable under point.
 ;; It uses a set of regular expressions based on the file extension, or major-mode, of the current buffer.
@@ -103,25 +121,6 @@
   :config
   (setq doom-modeline-buffer-file-name-style 'relative-from-project
         doom-modeline-project-Easier 'detection))
-
-;; Drag stuff (lines, words, region, etc...) around
-;; note(bl) change drag-stuff-modifier to avoid conflict with windmove shortcuts
-(use-package drag-stuff
-  :diminish
-  :commands drag-stuff-define-keys
-  :hook (after-init . drag-stuff-global-mode)
-  :config
-  (setq drag-stuff-modifier 'hyper)
-  (add-to-list 'drag-stuff-except-modes 'org-mode)
-  (drag-stuff-define-keys))
-
-(use-package windmove
-  :ensure t
-  :config
-  ;; use command key on Mac
-  (setq windmove-default-keybindings 'meta)
-  ;; wrap around at edges
-  (setq windmove-wrap-around t))
 
 ;; Zoom in/out
 ;; note(bl) zoom in/out with M-+/M--
@@ -229,6 +228,17 @@
 ;; fzf is a fuzzy file finder which is very quick.
 (use-package fzf)
 
+;; note(bl) use google-translate
+(use-package google-translate
+  :ensure t
+  :bind
+  ("C-c C-g" . google-translate-at-point)
+  :init
+  (setq google-translate-default-source-language "auto"
+        google-translate-default-target-language "fr")
+  :config
+  (use-package google-translate-default-ui))
+
 ;; Search tool
 ;; note(bl) to fix find-grep command
 (use-package grep
@@ -258,6 +268,34 @@
      'grep-find-command '("rg --color=auto --null -nH --no-heading -e ''" . 45))
     (grep-apply-setting
      'grep-find-template "rg --color=auto --null -nH --no-heading -e <R> <D>"))))
+
+;; https://internal1.languagetool.org/snapshots/
+(use-package langtool
+  :init
+  (setq langtool-language-tool-jar "/home/T0125936/work/emacs/LanguageTool-6.0-SNAPSHOT/languagetool-commandline.jar"
+        langtool-disabled-rules '("WHITESPACE_RULE"
+                                  "EN_UNPAIRED_BRACKETS"
+                                  "COMMA_PARENTHESIS_WHITESPACE"
+                                  "EN_QUOTES"))
+  :config
+  (defun langtool-autoshow-detail-popup (overlays)
+    (when (require 'popup nil t)
+      ;; Do not interrupt current popup
+      (unless (or popup-instances
+                  ;; suppress popup after type `C-g` .
+                  (memq last-command '(keyboard-quit)))
+        (let ((msg (langtool-details-error-message overlays)))
+          (popup-tip msg)))))
+  (setq langtool-autoshow-message-function
+        'langtool-autoshow-detail-popup))
+
+(use-package flycheck-languagetool
+  :hook
+  (text-mode . (lambda () (require 'flycheck-languagetool)))
+  :init
+  (setq flycheck-languagetool-server-jar "/home/T0125936/work/emacs/LanguageTool-6.0-SNAPSHOT/languagetool-server.jar")
+  (setq flycheck-languagetool-server-port "8082")
+  (setq flycheck-languagetool-language "en-GB"))
 
 (use-package lsp-mode
   :init (setq lsp-keymap-prefix "C-c l"
@@ -321,6 +359,16 @@
   :config (setq mouse-wheel-scroll-amount '(2 ((shift) . 1))
                 mouse-wheel-progressive-speed nil))
 
+(use-package quelpa
+  :custom (quelpa-upgrade-p t "Always try to update packages")
+  :config
+  ;; Get ‘quelpa-use-package’ via ‘quelpa’
+  (quelpa
+   '(quelpa-use-package
+     :fetcher git
+     :url "https://github.com/quelpa/quelpa-use-package.git"))
+  (require 'quelpa-use-package))
+
 ;; Search tools
 ;; Writable `grep' buffer
 ;; note(bl) change enable key to 'w'
@@ -334,6 +382,14 @@
 (use-package whitespace
   :ensure nil
   :hook (before-save . whitespace-cleanup))
+
+(use-package windmove
+  :ensure t
+  :config
+  ;; use command key on Mac
+  (setq windmove-default-keybindings 'meta)
+  ;; wrap around at edges
+  (setq windmove-wrap-around t))
 
 ;; Display line changes in gutter based on git history. Enable it everywhere.
 ;; Gutter Icons indicating inserted, modified or deleted lines
@@ -387,6 +443,14 @@
 
 ;; (use-package git-commit-insert-issue)
 
+;; note(bl) add centaur-tab and minimap
+(pretty-hydra-define+ toggles-hydra ()
+  (;; these heads are added to the existing "Windows" column
+   "Basic"
+   (("u" centaur-tabs-mode "centaur mode" :toggle t)
+    ("x" minimap-mode "minimap mode" :toggle t))))
+;; ("z" blamer-mode "blamer mode" :toggle t)
+
 ;;;;::::::::::
 ;; SHORTKEYS
 ;;;;;;;;;;;;;;
@@ -414,6 +478,8 @@
 
 (global-set-key (kbd "<f9>") 'flyspell-auto-correct-word)
 (global-set-key (kbd "<C-f9>") 'flyspell-correct-word-before-point)
+;; (global-set-key (kbd "<f9>") 'langtool-check-buffer)
+;; (global-set-key (kbd "<f9>") 'langtool-correct-buffer)
 
 ;; ;; Copy the path to your kill ring instead of placing it into your buffer
 ;; (defun my/filename ()
@@ -429,4 +495,4 @@
 ;;   (setq plantuml-jar-path "~/work/plantuml-1.2022.1.jar"
 ;;         plantuml-default-exec-mode 'jar)
 ;;   (add-to-list 'auto-mode-alist '("\\.plantuml\\'" . plantuml-mode)))
-(setq org-plantuml-jar-path "~/work/plantuml-1.2022.1.jar")
+(setq org-plantuml-jar-path "~/work/emacs/plantuml-1.2022.1.jar")
