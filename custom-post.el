@@ -30,25 +30,6 @@
   :init
   (add-hook 'ansible-hook 'bl/setup-ansible-doc))
 
-;; (use-package blamer
-;;   :ensure t
-;;   ;;  :quelpa ((blamer :fetcher github :repo "artawower/blamer.el") :upgrade t)
-;;   :bind (("s-i" . blamer-show-commit-info)
-;;          ("C-c i" . blamer-show-posframe-commit-info))
-;;   :defer 20
-;;   :custom
-;;   (blamer-idle-time 0.3)
-;;   (blamer-min-offset 70)
-;;   (blamer-max-commit-message-length 80) ;; Show me a lot of the commit title
-;;   (blamer--overlay-popup-position 'smart)
-;;   :custom-face
-;;   (blamer-face ((t :foreground "#7a88cf"
-;;                    :background nil
-;;                    :height 100
-;;                    :italic t)))
-;;   :config
-;;   (global-blamer-mode 1))
-
 (use-package centaur-tabs
   :ensure t
   :demand
@@ -67,7 +48,6 @@
   ;; group your tabs by Projectile’s project
   (centaur-tabs-group-by-projectile-project)
   :hook
-  (dired-mode . centaur-tabs-local-mode)
   (dashboard-mode . centaur-tabs-local-mode)
   (term-mode . centaur-tabs-local-mode)
   (calendar-mode . centaur-tabs-local-mode)
@@ -314,8 +294,12 @@
               lsp-enable-symbol-highlighting nil
               lsp-enable-text-document-color nil
 
-              lsp-enable-indentation nil
+              lsp-enable-indentation t
               lsp-enable-on-type-formatting nil
+
+              ;; LSP ui
+              lsp-ui-doc-max-height 40
+              lsp-ui-doc-max-width 80
 
               ;; For diagnostics
               lsp-diagnostics-disabled-modes '(markdown-mode gfm-mode)
@@ -444,12 +428,16 @@
 ;; (use-package git-commit-insert-issue)
 
 ;; note(bl) add centaur-tab and minimap
+;; https://github.com/jerrypnz/major-mode-hydra.el#pretty-hydra-define-1
 (pretty-hydra-define+ toggles-hydra ()
-  (;; these heads are added to the existing "Windows" column
+  (;; these heads are added to the existing "Basic" column
    "Basic"
-   (("u" centaur-tabs-mode "centaur mode" :toggle t)
-    ("x" minimap-mode "minimap mode" :toggle t))))
-;; ("z" blamer-mode "blamer mode" :toggle t)
+   ;; g j k o p r w z
+   (("w" centaur-tabs-mode "centaur mode" :toggle t)
+    ("o" minimap-mode "minimap mode" :toggle t)
+    ("z" treemacs "treemacs mode" :toggle t))
+   "Program"
+   (("g" langtool-check-buffer "language tool check" :toggle t))))
 
 ;;;;::::::::::
 ;; SHORTKEYS

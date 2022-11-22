@@ -41,7 +41,6 @@ https://oremacs.com/2015/02/02/colorful-hydrae/
   => https://github.com/sharkdp/fd
 -  markdown linter
   => install multimarkdown 6
--
 
 * done
 ** init-const.el
