@@ -45,11 +45,14 @@ https://oremacs.com/2015/02/02/colorful-hydrae/
 * done
 ** init-const.el
 ** init-custom.el
-** [init-dart.el]
+** [init-dart.el] (empty)
 ** [init-dashboard.el]
 ** init-dict.el
 ** init-docker.el
 ** init-dired.el
-** init-elixir.el
+** [init-elixir.el] (empty)
 ** init-hydra.el
+** init-ibuffer.el
 ** init-projectile.el
+** init-rust.el (empty)
+** init-yasnippet.el (empty)

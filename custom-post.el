@@ -249,6 +249,10 @@
     (grep-apply-setting
      'grep-find-template "rg --color=auto --null -nH --no-heading -e <R> <D>"))))
 
+(use-package jinja2-mode
+  :ensure t
+  :mode "\\.j2\\'")
+
 ;; https://internal1.languagetool.org/snapshots/
 (use-package langtool
   :init
@@ -330,7 +334,9 @@
         minimap-hide-fringes t
         minimap-dedicated-window t
         minimap-always-recenter t
-        minimap-minimum-width 20)
+        minimap-minimum-width 20
+        minimap-dedicated-window nil
+        minimap-major-modes '(prog-mode text-mode))
   :custom-face
   (minimap-font-face ((t (:height 13 :weight bold :width condensed
                           :spacing dual-width :family "VT323"))))
@@ -342,6 +348,20 @@
   :ensure nil
   :config (setq mouse-wheel-scroll-amount '(2 ((shift) . 1))
                 mouse-wheel-progressive-speed nil))
+
+(use-package plantuml-mode
+  :ensure t
+  :mode "\\.plu\\'"
+  :custom
+  (plantuml-jar-path "~/work/emacs/plantuml-1.2022.13.jar")
+  (plantuml-default-exec-mode 'jar))
+
+(use-package flycheck-plantuml
+  :ensure t
+  :commands (flycheck-plantuml-setup)
+  :init
+  (with-eval-after-load 'flycheck
+    (flycheck-plantuml-setup)))
 
 (use-package quelpa
   :custom (quelpa-upgrade-p t "Always try to update packages")
@@ -474,13 +494,3 @@
 ;;   "Copy the full path of the current buffer."
 ;;   (interactive)
 ;;   (kill-new (buffer-file-name (window-buffer (minibuffer-selected-window)))))
-
-;; (use-package jinja2-mode :defer t)
-
-;; (use-package plantuml
-;;   :ensure t
-;;   :init
-;;   (setq plantuml-jar-path "~/work/plantuml-1.2022.1.jar"
-;;         plantuml-default-exec-mode 'jar)
-;;   (add-to-list 'auto-mode-alist '("\\.plantuml\\'" . plantuml-mode)))
-(setq org-plantuml-jar-path "~/work/emacs/plantuml-1.2022.1.jar")
