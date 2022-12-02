@@ -30,34 +30,6 @@
   :init
   (add-hook 'ansible-hook 'bl/setup-ansible-doc))
 
-(use-package centaur-tabs
-  :ensure t
-  :demand
-  :config
-  (setq centaur-tabs-set-bar 'under
-        ;; Navigate through tab groups only
-        centaur-tabs-cycle-scope 'tabs
-        centaur-tabs-show-navigation-buttons nil
-        ;; Note: If you're not using Spacmeacs, in order for the underline to display
-        ;; correctly you must add the following line:
-        x-underline-at-descent-line t
-        centaur-tabs-adjust-buffer-order t
-        centaur-tabs-height 32)
-  (centaur-tabs-mode t)
-  (centaur-tabs-enable-buffer-alphabetical-reordering)
-  ;; group your tabs by Projectile’s project
-  (centaur-tabs-group-by-projectile-project)
-  :hook
-  (dashboard-mode . centaur-tabs-local-mode)
-  (term-mode . centaur-tabs-local-mode)
-  (calendar-mode . centaur-tabs-local-mode)
-  (org-agenda-mode . centaur-tabs-local-mode)
-  (helpful-mode . centaur-tabs-local-mode)
-  :bind
-  ("<C-S-f11>" . centaur-tabs-mode)
-  ("C-s-<left>" . centaur-tabs-backward)
-  ("C-s-<right>" . centaur-tabs-forward))
-
 ;; Drag stuff (lines, words, region, etc...) around
 ;; note(bl) change drag-stuff-modifier to avoid conflict with windmove shortcuts
 (use-package drag-stuff
@@ -121,18 +93,18 @@
     (global-text-scale-mode 1))
   :config
   (global-set-key (kbd "M-0")
-                  '(lambda ()
-                     (interactive)
-                     (global-text-scale-adjust (- text-scale-mode-amount))
-                     (global-text-scale-mode -1)))
+                  #'(lambda ()
+                      (interactive)
+                      (global-text-scale-adjust (- text-scale-mode-amount))
+                      (global-text-scale-mode -1)))
   (global-set-key (kbd "M-+")
-                  '(lambda ()
-                     (interactive)
-                     (global-text-scale-adjust 1)))
+                  #'(lambda ()
+                      (interactive)
+                      (global-text-scale-adjust 1)))
   (global-set-key (kbd "M--")
-                  '(lambda ()
-                     (interactive)
-                     (global-text-scale-adjust -1))))
+                  #'(lambda ()
+                      (interactive)
+                      (global-text-scale-adjust -1))))
 
 ;; Modify default window split
 ;; note(bl) give focus to new window
@@ -152,6 +124,62 @@
   :bind
   (("C-x 2" . 'ian/split-and-follow-horizontally)
    ("C-x 3" . 'ian/split-and-follow-vertically)))
+
+; shortkeys
+(use-package emacs
+  :ensure nil
+  :preface
+  (defun show-file-name ()
+    "Show the full path file name in the minibuffer."
+    (interactive)
+    (message (buffer-file-name)))
+  ;; Copy the path to your kill ring instead of placing it into your buffer
+  (defun my/filename ()
+    "Copy the full path of the current buffer."
+    (interactive)
+    (kill-new (buffer-file-name (window-buffer (minibuffer-selected-window)))))
+  :bind
+  (("M-g" . 'goto-line)
+   ("<f1>" . 'eldoc)
+   ("<C-f1>" . 'show-file-name)
+   ("<C-S-f1>" . 'my/filename)
+   ("<f2>" . 'xref-pop-marker-stack)
+   ("<f3>" . 'xref-find-definitions)
+   ("<C-f3>" . 'xref-find-references)
+   ;; To look for a regex pattern we use
+   ("<C-S-f3>" . 'xref-find-apropos)
+   ("<f4>" . 'counsel-grep)
+   ("<C-f4>" . 'projectile-ripgrep)
+   ("<C-S-f4>" . 'counsel-projectile-git-grep)
+   ("<f5>" . 'magit-blame)
+   ("<f8>" . 'magit-status)
+   ("<f9>" . 'flyspell-auto-correct-word)
+   ("<C-f9>" . 'flyspell-correct-word-before-point)))
+;; (global-set-key (kbd "<f9>") 'langtool-check-buffer)
+;; (global-set-key (kbd "<f9>") 'langtool-correct-buffer)
+
+;; tab-line
+(use-package emacs
+  :ensure nil
+  :preface
+  (require 'powerline)
+  (defvar my/tab-height 22)
+  (defvar my/tab-left (powerline-wave-right 'tab-line nil my/tab-height))
+  (defvar my/tab-right (powerline-wave-left nil 'tab-line my/tab-height))
+  (defun my/tab-line-tab-name-buffer (buffer &optional _buffers)
+    (powerline-render (list my/tab-left
+                            (format "%s" (buffer-name buffer))
+                            my/tab-right)))
+  :config
+  (global-tab-line-mode t)
+  (setq tab-line-tab-name-function #'my/tab-line-tab-name-buffer
+        tab-line-new-button-show nil  ;; do not show add-new button
+        tab-line-close-button-show nil  ;; do not show close button
+        tab-line-separator "")  ;; set it to empty
+  :bind
+  (("<C-S-f11>" . global-tab-line-mode)
+   ("C-s-<left>" . switch-to-prev-buffer)
+   ("C-s-<right>" . switch-to-next-buffer)))
 
 ;; (global-set-key (kbd "<C-S-f1>") 'my/filename)
 (use-package emacs
@@ -173,6 +201,23 @@
             (message "Jira ID (KAS-XXXX) not found")))))))
   :bind
   (("<f12>" . 'open-jira-ID-at-point)))
+
+;; Hydra+
+(use-package emacs
+  :ensure nil
+  :after (hydra)
+  :config
+  ;; note(bl) (and )dd tab-line, minimap, treemacs and langtool
+  ;; https://github.com/jerrypnz/major-mode-hydra.el#pretty-hydra-define-1
+  (pretty-hydra-define+ toggles-hydra ()
+    (;; these heads are added to the existing "Basic" column
+     "Basic"
+     ;; g j k o p r w z
+     (("w" global-tab-line-mode "tab-line mode" :toggle t)
+      ("o" minimap-mode "minimap mode" :toggle t)
+      ("z" treemacs "treemacs mode" :toggle t))
+     "Program"
+     (("g" langtool-check-buffer "language tool check" :toggle t)))))
 
 ;; Increase selected region by semantic units
 ;; note(bl) add contract-region keymap
@@ -293,6 +338,8 @@
               lsp-semantic-tokens-enable t
               lsp-progress-spinner-type 'progress-bar-filled
 
+              lsp-terraform-server "terraform-ls"
+
               lsp-enable-file-watchers nil
               lsp-enable-folding nil
               lsp-enable-symbol-highlighting nil
@@ -356,6 +403,9 @@
   (plantuml-jar-path "~/work/emacs/plantuml-1.2022.13.jar")
   (plantuml-default-exec-mode 'jar))
 
+(use-package terraform-mode
+  :ensure t)
+
 (use-package flycheck-plantuml
   :ensure t
   :commands (flycheck-plantuml-setup)
@@ -372,6 +422,14 @@
      :fetcher git
      :url "https://github.com/quelpa/quelpa-use-package.git"))
   (require 'quelpa-use-package))
+
+;; note(bl) useful HTTP client
+(use-package restclient
+  :ensure t
+  :defer t
+  :mode (("\\.http\\'" . restclient-mode))
+  :bind (:map restclient-mode-map
+         ("C-c C-f" . json-mode-beautify)))
 
 ;; Search tools
 ;; Writable `grep' buffer
@@ -446,51 +504,3 @@
 (add-hook 'xref-backend-functions #'dumb-jump-xref-activate t)
 
 ;; (use-package git-commit-insert-issue)
-
-;; note(bl) add centaur-tab and minimap
-;; https://github.com/jerrypnz/major-mode-hydra.el#pretty-hydra-define-1
-(pretty-hydra-define+ toggles-hydra ()
-  (;; these heads are added to the existing "Basic" column
-   "Basic"
-   ;; g j k o p r w z
-   (("w" centaur-tabs-mode "centaur mode" :toggle t)
-    ("o" minimap-mode "minimap mode" :toggle t)
-    ("z" treemacs "treemacs mode" :toggle t))
-   "Program"
-   (("g" langtool-check-buffer "language tool check" :toggle t))))
-
-;;;;::::::::::
-;; SHORTKEYS
-;;;;;;;;;;;;;;
-(global-set-key (kbd "M-g") 'goto-line)
-(global-set-key (kbd "<f1>") 'eldoc)
-(defun show-file-name ()
-  "Show the full path file name in the minibuffer."
-  (interactive)
-  (message (buffer-file-name)))
-(global-set-key (kbd "<C-f1>") 'show-file-name)
-(global-set-key (kbd "<f2>") 'xref-pop-marker-stack)
-(global-set-key (kbd "<f3>") 'xref-find-definitions)
-(global-set-key (kbd "<C-f3>") 'xref-find-references)
-;; To look for a regex pattern we use
-(global-set-key (kbd "<C-S-f3>") 'xref-find-apropos)
-
-(global-set-key (kbd "<f4>") 'counsel-grep)
-(global-set-key (kbd "<C-f4>") 'projectile-ripgrep)
-(global-set-key (kbd "<C-S-f4>") 'counsel-projectile-git-grep)
-
-(global-set-key (kbd "<f5>") 'magit-blame)
-(global-set-key (kbd "<f8>") 'magit-status)
-(global-set-key (kbd "<f8> c") 'magit-checkout)
-(global-set-key (kbd "<f8> l") 'magit-log-buffer-file)
-
-(global-set-key (kbd "<f9>") 'flyspell-auto-correct-word)
-(global-set-key (kbd "<C-f9>") 'flyspell-correct-word-before-point)
-;; (global-set-key (kbd "<f9>") 'langtool-check-buffer)
-;; (global-set-key (kbd "<f9>") 'langtool-correct-buffer)
-
-;; ;; Copy the path to your kill ring instead of placing it into your buffer
-;; (defun my/filename ()
-;;   "Copy the full path of the current buffer."
-;;   (interactive)
-;;   (kill-new (buffer-file-name (window-buffer (minibuffer-selected-window)))))
