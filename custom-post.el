@@ -78,7 +78,7 @@
 ;; note(bl) zoom in/out with M-+/M--
 (use-package emacs
   :ensure nil
-  :after (face-remap)
+  :after face-remap
   :preface
   (define-globalized-minor-mode
     global-text-scale-mode
@@ -171,7 +171,7 @@
                             (format "%s" (buffer-name buffer))
                             my/tab-right)))
   :config
-  (global-tab-line-mode t)
+  ;; (global-tab-line-mode t)
   (setq tab-line-tab-name-function #'my/tab-line-tab-name-buffer
         tab-line-new-button-show nil  ;; do not show add-new button
         tab-line-close-button-show nil  ;; do not show close button
@@ -184,7 +184,7 @@
 ;; (global-set-key (kbd "<C-S-f1>") 'my/filename)
 (use-package emacs
   :ensure nil
-  :after (projectile)
+  :after projectile
   :config
   (defvar jira-url "https://thales-factory.atlassian.net/" "Jira URL")
   (defun open-jira-ID-at-point ()
@@ -205,7 +205,7 @@
 ;; Hydra+
 (use-package emacs
   :ensure nil
-  :after (hydra)
+  :after hydra
   :config
   ;; note(bl) (and )dd tab-line, minimap, treemacs and langtool
   ;; https://github.com/jerrypnz/major-mode-hydra.el#pretty-hydra-define-1
@@ -501,6 +501,8 @@
 ;; :bind (("C-M-g" . dumb-jump-go)
 ;;        ("C-M-p" . dumb-jump-back)
 ;;        ("C-M-q" . dumb-jump-quick-look)))
+;;
+;; note (bl) xref will fall back to dumb-jump when there are no better options.
 (add-hook 'xref-backend-functions #'dumb-jump-xref-activate t)
 
 ;; (use-package git-commit-insert-issue)

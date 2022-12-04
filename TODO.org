@@ -10,11 +10,6 @@ https://github.com/emacs-straight/flymake-proselint
 ** multi-cursor
 ** org-roam
 ** expand-region
-** Hydra, <f6>, personal keymap, personal menu
-https://github.com/abo-abo/hydra
-https://github.com/jerrypnz/major-mode-hydra.el
-https://readingworldmagazine.com/emacs/2020-02-27-emacs-hydra-set-up-code/
-https://oremacs.com/2015/02/02/colorful-hydrae/
 
 * Install
 -  emacs 28
@@ -26,6 +21,8 @@ https://oremacs.com/2015/02/02/colorful-hydrae/
 - terraform-ls (APT/RPM)
 
 * Done
+** [init-calendar.el] (empty)
+** [init-c.el] (empty)
 ** init-const.el
 ** init-custom.el
 ** [init-dart.el] (empty)
